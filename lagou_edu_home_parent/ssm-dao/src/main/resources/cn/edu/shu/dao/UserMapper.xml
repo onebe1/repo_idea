@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.edu.shu.dao.UserMapper">
+    <select id="findAllUserByPage" parameterType="userVo" resultType="User">
+        select * from user
+        <where>
+            <if test="true">
+                and is_del!=1
+            </if>
+            <if test="username!=null and username !=''">
+                and name=#{username}
+            </if>
+
+            <if test="startCreateTime!=null and endCreateTime !=null">
+                And create_time BETWEEN #{startCreateTime} AND #{endCreateTime}
+            </if>
+
+        </where>
+    </select>
+
+
+    <select id="login" resultType="user" parameterType="user">
+         select * from user where phone = #{phone}
+    </select>
+    <!--  根据用户ID查询关联的角色信息  -->
+    <select id="findRoleById" parameterType="int" resultType="role">
+        SELECT r.* FROM roles r INNER JOIN user_role_relation ur ON r.id=ur.role_id WHERE ur.user_id= #{uid}
+    </select>
+
+
+    <select id="findMenuByRoleId" parameterType="java.util.List" resultType="menu">
+        SELECT m.* FROM menu m INNER JOIN `role_menu_relation` rm ON m.id = rm.menu_id WHERE m.parent_id=-1 AND
+        rm.role_id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <select id="findSubMenuByPid" parameterType="int" resultType="Menu">
+        select * from menu where parent_id=#{pid}
+    </select>
+
+    <select id="findResourceByRoleId" parameterType="java.util.List" resultType="resource">
+        SELECT
+        r.*
+        FROM resource r INNER JOIN role_resource_relation rr ON r.id =rr.resource_id WHERE rr.role_id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+             #{item}
+        </foreach>
+    </select>
+
+
+</mapper>

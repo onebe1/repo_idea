@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="cn.edu.shu.dao.CourseContentMapper">
+
+    <!--    这里的id是将于下面进行连接,是我们自己取的名字-->
+    <resultMap id="SectionAndLessonResultMap" type="courseSection">
+        <!--        这里的property对应的是实体类中的属性，而column对应数据库中的字段-->
+        <id property="id" column="id"></id>
+
+        <result property="courseId" column="course_id"></result>
+        <result property="sectionName" column="section_name"></result>
+        <result property="description" column="description"></result>
+        <result property="createTime" column="create_time"></result>
+        <result property="updateTime" column="update_time"></result>
+        <result property="isDe" column="is_de"></result>
+        <result property="orderNum" column="order_num"></result>
+        <result property="status" column="status"></result>
+
+        <!--        这里的property对应实体类的集合名称， 这里的ofType对应集合的泛型-->
+        <collection property="lessonList" ofType="CourseLesson">
+            <id property="id" column="lesson_id"></id>
+            <result property="courseId" column="course_id"></result>
+            <result property="sectionId" column="section_id"></result>
+            <result property="theme" column="theme"></result>
+            <result property="duration" column="duration"></result>
+            <result property="createTime" column="create_time"></result>
+            <result property="updateTime" column="update_time"></result>
+            <result property="isDel" column="is_del"></result>
+            <result property="orderNum" column="order_num"></result>
+            <result property="status" column="status"></result>
+        </collection>
+
+    </resultMap>
+
+
+    <select id="findSectionAndLessonByCourseId" parameterType="int" resultMap="SectionAndLessonResultMap">
+            SELECT
+                cs.*,
+                cl.id lesson_id,
+                cl.course_id,
+                cl.section_id,
+                cl.theme,
+                cl.duration,
+                cl.create_time,
+                cl.update_time,
+                cl.is_del,
+                cl.order_num,
+                cl.status
+            FROM course_section cs LEFT JOIN course_lesson cl ON cs.id =cl.course_id WHERE cs.course_id =#{id} ORDER BY cs.order_num;
+    </select>
+
+
+    <select id="findCourseByCourseId" parameterType="int" resultType="course">
+        select id,course_name from course where id=#{courseId}
+    </select>
+
+
+    <insert id="saveSection" parameterType="CourseSection">
+        insert into course_section(course_id,section_name,description,order_num,status,create_time,update_time) values(#{courseId},#{sectionName},#{description},#{orderNum},#{status},#{createTime},#{updateTime});
+    </insert>
+
+
+    <update id="updateSection" parameterType="courseSection">
+        UPDATE course_section
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sectionName != null and sectionName != ''">
+                section_name =#{sectionName},
+            </if>
+            <if test="description != null and description != ''">
+                description=#{description},
+            </if>
+            <if test="orderNum != null and orderNum != ''">
+                order_num=#{orderNum},
+            </if>
+        </trim>
+        <where>
+            <if test="id!=null and id != '' ">id=#{id}</if>
+        </where>
+    </update>
+</mapper>
